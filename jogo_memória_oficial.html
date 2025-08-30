@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>jogo da Memória</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2e0dd5;
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+    }
+    nav {
+      background: #333;
+      padding: 10px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      padding: 20px;
+    }
+    footer {
+      background: #4CAF50;
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+    }
+  </style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+    }
+    #tabuleiro {
+      display: grid;
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .carta {
+      width: 60px;
+      height: 60px;
+      background: #3498db;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .escondida {
+      background: #3498db;
+      color: transparent;
+    }
+    .revelada {
+      background: #2ecc71;
+      color: white;
+    }
+    .fixa.jogador1 {
+      background: #062be0; /* azul escuro para jogador 1 */
+      color: white;
+    }
+    .fixa.jogador2 {
+      background: #ea4b4b; /* vermelho claro para jogador 2 */
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>Jogo da Memória</header>
+
+  <div>
+    <label for="dificuldade">Escolhe a dificuldade:</label>
+    <select id="dificuldade">
+      <option value="super_facil">Super Fácil (8 cartas)</option>
+      <option value="facil">Fácil (20 cartas)</option>
+      <option value="media">Médio (56 cartas)</option>
+      <option value="dificil">Difícil (72 cartas)</option>
+      <option value="super_dificil">Super Difícil (100 cartas)</option>
+    </select>
+    <button onclick="iniciarJogo()">Iniciar</button>
+  </div>
+  <p style="color:#062be0;">Jogador 1: <span id="pontos1">0</span> pontos</p>
+  <p style="color:#ea4b4b;">Jogador 2: <span id="pontos2">0</span> pontos</p>
+  <p>Vez do: <span id="vez">Jogador 1</span></p>
+  <div id="tabuleiro"></div>
+
+  <script>
+    const tabuleiro = document.getElementById("tabuleiro");
+    const pontos1El = document.getElementById("pontos1");
+    const pontos2El = document.getElementById("pontos2");
+    const vezEl = document.getElementById("vez");
+    let pontos1 = 0;
+    let pontos2 = 0;
+    let jogadorAtual = 1;
+    let primeiraCarta = null;
+    let segundaCarta = null;
+    let bloqueado = false;
+
+    function iniciarJogo() {
+      // Reset
+      tabuleiro.innerHTML = "";
+      pontos1 = 0;
+      pontos2 = 0;
+      pontos1El.textContent = 0;
+      pontos2El.textContent = 0;
+      jogadorAtual = 1;
+      vezEl.textContent = "Jogador 1";
+
+      const dificuldade = document.getElementById("dificuldade").value;
+      let pares;
+      if (dificuldade === "super_facil") pares = 4; // 8 cartas
+      if (dificuldade === "facil") pares = 10; // 20 cartas
+      if (dificuldade === "media") pares = 28; // 56 cartas
+      if (dificuldade === "dificil") pares = 36; // 72 cartas
+      if (dificuldade === "super_dificil") pares = 50; // 100 cartas
+
+      let numeros = [];
+      for (let i = 1; i <= pares; i++) {
+        numeros.push(i, i);
+      }
+
+      numeros = baralhar(numeros);
+
+      // Ajustar grelha conforme nº de cartas
+      let colunas = Math.ceil(Math.sqrt(numeros.length));
+      tabuleiro.style.gridTemplateColumns = "repeat(" + colunas + ", 60px)";
+
+      numeros.forEach((numero) => {
+        const carta = document.createElement("div");
+        carta.classList.add("carta", "escondida");
+        carta.dataset.numero = numero;
+        carta.textContent = numero;
+        carta.addEventListener("click", () => virarCarta(carta));
+        tabuleiro.appendChild(carta);
+      });
+    }
+
+    // Função para baralhar (algoritmo Fisher-Yates)
+    function baralhar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function virarCarta(carta) {
+      if (bloqueado || carta.classList.contains("revelada") || carta.classList.contains("fixa")) return;
+
+      carta.classList.remove("escondida");
+      carta.classList.add("revelada");
+
+      if (!primeiraCarta) {
+        primeiraCarta = carta;
+      } else {
+        segundaCarta = carta;
+        verificarPar();
+      }
+    }
+
+    function verificarPar() {
+      bloqueado = true;
+      if (primeiraCarta.dataset.numero === segundaCarta.dataset.numero) {
+        primeiraCarta.classList.remove("revelada");
+        segundaCarta.classList.remove("revelada");
+        primeiraCarta.classList.add("fixa", "jogador" + jogadorAtual);
+        segundaCarta.classList.add("fixa", "jogador" + jogadorAtual);
+
+
+        if (jogadorAtual === 1) {
+          pontos1++;
+          pontos1El.textContent = pontos1;
+        } else {
+          pontos2++;
+          pontos2El.textContent = pontos2;
+        }
+        resetarJogada(false);
+      } else {
+        setTimeout(() => {
+          primeiraCarta.classList.remove("revelada");
+          primeiraCarta.classList.add("escondida");
+          segundaCarta.classList.remove("revelada");
+          segundaCarta.classList.add("escondida");
+          mudarJogador();
+          resetarJogada(true);
+        }, 1000);
+      }
+    }
+
+    function mudarJogador() {
+      jogadorAtual = jogadorAtual === 1 ? 2 : 1;
+      vezEl.textContent = "Jogador " + jogadorAtual
+    }
+
+    function resetarJogada() {
+      [primeiraCarta, segundaCarta] = [null, null];
+      bloqueado = false;
+    }
+  </script>
+
+  
+
+  
+</body>
+</html>
