@@ -12,7 +12,7 @@
       padding: 0;
     }
     header {
-      background: #0dd546;
+      background: #2e0dd5;
       color: white;
       padding: 20px;
       font-size: 24px;
@@ -88,7 +88,7 @@
   <div>
     <label for="dificuldade">Escolhe a dificuldade:</label>
     <select id="dificuldade">
-      <option value="super_facil">Super Fácil (8 cartas)</option>
+      <option value="super_facil">Super Fácil (6 cartas)</option>
       <option value="facil">Fácil (20 cartas)</option>
       <option value="media">Médio (56 cartas)</option>
       <option value="dificil">Difícil (72 cartas)</option>
@@ -125,7 +125,7 @@
 
       const dificuldade = document.getElementById("dificuldade").value;
       let pares;
-      if (dificuldade === "super_facil") pares = 4; // 8 cartas
+      if (dificuldade === "super_facil") pares = 3; // 6 cartas
       if (dificuldade === "facil") pares = 10; // 20 cartas
       if (dificuldade === "media") pares = 28; // 56 cartas
       if (dificuldade === "dificil") pares = 36; // 72 cartas
