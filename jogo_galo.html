@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo do Galo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #2e0dd5;
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+    #tabuleiro {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+    .casa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      background: white;
+      border: 2px solid #333;
+      cursor: pointer;
+    }
+    .casa:disabled {
+      cursor: not-allowed;
+      background: #ddd;
+    }
+    #mensagem {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    button#reset {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>Jogo da Galo</header>
+    <button id="reset">Iníciar</button>
+  <div id="mensagem">Vez do jogador: X</div>
+
+  <div style="margin-top: 20px; display: flex; justify-content: center;">
+    <div id="tabuleiro"></div>
+  </div>
+
+  <script>
+    const resetBtn = document.getElementById("reset");
+    const tabuleiro = document.getElementById("tabuleiro");
+    const mensagem = document.getElementById("mensagem");
+
+
+    let casas = Array(9).fill(null);
+    let jogador = "X";
+    let vencedor = null;
+
+    mensagem.style.display = "none"
+    tabuleiro.style.display = "none"
+
+    const combinacoes = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function criarTabuleiro() {
+      tabuleiro.innerHTML = "";
+      casas.forEach((valor, i) => {
+        const botao = document.createElement("button");
+        botao.classList.add("casa");
+        botao.textContent = valor || "";
+        botao.disabled = valor || vencedor;
+        botao.onclick = () => jogar(i);
+        tabuleiro.appendChild(botao);
+      });
+    }
+
+    function verificarVencedor() {
+      for (let [a, b, c] of combinacoes) {
+        if (casas[a] && casas[a] === casas[b] && casas[a] === casas[c]) {
+          return casas[a];
+        }
+      }
+      return null;
+    }
+
+    function jogar(index) {
+      if (casas[index] || vencedor) return;
+      casas[index] = jogador;
+      vencedor = verificarVencedor();
+      if (vencedor) {
+        mensagem.textContent = `🎉 Vencedor: ${vencedor}`;
+      } else if (casas.every(c => c)) {
+        mensagem.textContent = "🤝 Empate!";
+      } else {
+        jogador = jogador === "X" ? "O" : "X";
+        mensagem.textContent = `Vez do jogador: ${jogador}`;
+      }
+      criarTabuleiro();
+    }
+
+    resetBtn.onclick = () => {
+      casas = Array(9).fill(null);
+      jogador = "X";
+      vencedor = null;
+
+      mensagem.style.display = "block"
+      tabuleiro.style.display = "grid"
+
+      mensagem.textContent = "Vez do jogador: X";
+      criarTabuleiro();
+    };
+
+    criarTabuleiro();
+  </script>
+</body>
+</html>
